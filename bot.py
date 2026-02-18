@@ -3,8 +3,14 @@ import glob
 import re
 from instagrapi import Client
 
-# جلب الـ Session ID من إعدادات الأمان في قيت هوب
 SESSION_ID = os.environ.get('IG_SESSIONID')
+
+# التأكد من أن قيت هوب قام بقراءة الـ Session فعلاً
+if not SESSION_ID:
+    print("خطأ: لم يتم العثور على IG_SESSIONID في الأسرار (Secrets)!")
+    exit()
+else:
+    print(f"تم العثور على مفتاح الجلسة (الطول: {len(SESSION_ID)} حرف).")
 
 folder_path = "images"
 images = glob.glob(f"{folder_path}/*.jpg") + glob.glob(f"{folder_path}/*.png")
@@ -24,7 +30,6 @@ image_to_post = images[0]
 try:
     print("جاري الدخول إلى إنستغرام باستخدام الـ Session...")
     cl = Client()
-    # تسجيل الدخول عبر مفتاح الجلسة بدلاً من اليوزر والباسورد
     cl.login_by_sessionid(SESSION_ID)
     
     print(f"جاري رفع الصورة: {image_to_post}")
