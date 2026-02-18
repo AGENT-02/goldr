@@ -1,0 +1,40 @@
+name: Instagram Sunset Poster
+
+on:
+  schedule:
+    # يعمل يومياً الساعة 15:30 بتوقيت UTC (تعادل 7:30 مساءً بتوقيت العين)
+    - cron: '30 15 * * *'
+  workflow_dispatch: # يتيح لك تشغيل الأداة يدوياً لعمل التست
+
+# إعطاء صلاحية للأداة لتعديل الملفات (لحذف الصورة بعد النشر)
+permissions:
+  contents: write
+
+jobs:
+  post-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install instagrapi Pillow
+
+      - name: Run Instagram Bot
+        env:
+          IG_USERNAME: ${{ secrets.IG_USERNAME }}
+          IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+        run: python bot.py
+
+      - name: Commit changes (Remove posted image)
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "action@github.com"
+          git add images/
+          git commit -m "Auto-removed posted image" || echo "No changes to commit"
+          git push
